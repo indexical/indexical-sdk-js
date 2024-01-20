@@ -7,7 +7,7 @@
     "moduleResolution": "Node",
     "jsx": "react-jsx",
     "types": ["vite/client", "node"],
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "dom"],
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "useDefineForClassFields": true,

@@ -15,7 +15,9 @@
     "build": "tsc && vite build",
     "build:types": "dts-bundle-generator --config ./dts-bundle-generator.config.ts"
   },
-  "dependencies": {},
+  "dependencies": {
+    "semver": "^7.5.4"
+  },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.18.0",
     "@typescript-eslint/parser": "^6.18.0",
