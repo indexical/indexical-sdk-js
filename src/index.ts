@@ -71,24 +71,106 @@ export function extractSourcesFromJS(input: string): { npm: string[] } {
     if (pkg.startsWith(".") || pkg.startsWith("/")) {
       continue;
     }
-    pkgs.add(result[6]);
+    pkgs.add(pkg);
   }
   while ((result = DYNAMIC_IMPORT_REGEX.exec(input)) !== null) {
     const pkg = result[2];
     if (pkg.startsWith(".") || pkg.startsWith("/")) {
       continue;
     }
-    pkgs.add(result[2]);
+    pkgs.add(pkg);
   }
   while ((result = REQUIRE_REGEX.exec(input)) !== null) {
     const pkg = result[2];
     if (pkg.startsWith(".") || pkg.startsWith("/")) {
       continue;
     }
-    pkgs.add(result[2]);
+    pkgs.add(pkg);
   }
 
   return {
     npm: [...pkgs],
   };
 }
+
+export function extractSourcesFromPy(input: string): {
+  pypi: string[];
+} {
+  const IMPORT_REGEX = /^\s*(?:from|import)\s+([\w.]+(?:\s*,\s*\w+)*)/gm;
+  let pkgs = new Set<string>();
+
+  let result;
+  while ((result = IMPORT_REGEX.exec(input)) !== null) {
+    const pkg_list = result[1];
+    const pkg_list_split = pkg_list
+      .split(",")
+      .filter((p) => !(p.startsWith(".") || p.startsWith("/")))
+      .map((p) => p.trim().split(".")[0]);
+    for (const pkg of pkg_list_split) {
+      pkgs.add(pkg);
+      pkgs.add(pkg.replaceAll("_", "-"));
+    }
+  }
+
+  return {
+    pypi: [...pkgs],
+  };
+}
+
+export function extractSourcesFromRequirementsTxt(input: string): {
+  pypi: string[];
+} {
+  const PACKAGE_LINE_REGEX = /^[A-Za-z0-9]+.*/gm;
+  let pkgs = new Set<string>();
+
+  let result;
+  while ((result = PACKAGE_LINE_REGEX.exec(input)) !== null) {
+    const pkg_line = result[0];
+    const VERSION_SPECIFIER_REGEX = /([=><!]+)\s*([0-9.*]+)/g;
+    const PACKAGE_NAME_REGEX = /^([A-Za-z0-9][A-Za-z0-9._-]*[A-Za-z0-9])/;
+
+    const pkg = PACKAGE_NAME_REGEX.exec(pkg_line)![0];
+
+    if (/^[a-z]+:\/\//.test(pkg_line)) {
+      continue;
+    }
+
+    if (pkg_line.includes("@")) {
+      pkgs.add(pkg);
+      continue;
+    }
+
+    let target = undefined;
+
+    while ((result = VERSION_SPECIFIER_REGEX.exec(pkg_line)) !== null) {
+      const [relation, version] = [result[1], result[2]];
+      if (relation === "==" || relation.includes(">")) {
+        target = version.replace("*", "0");
+      }
+    }
+
+    pkgs.add(target ? `${pkg}@${target}` : pkg);
+  }
+
+  return {
+    pypi: [...pkgs],
+  };
+}
+
+// export function extractSourcesFromSetupPy(input: string): {
+//   pypi: string[];
+// } {
+
+//   return {
+//     pypi: [...pkgs],
+//   };
+// }
+
+// export function extractSourcesFromPyprojectToml(input: string): {
+//   pypi: string[];
+// } {
+
+//   return {
+//     pypi: [...pkgs],
+//   };
+// }
