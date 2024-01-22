@@ -1,6 +1,6 @@
 # Indexical JS SDK
 
-The Indexical SDK for Javascript/Typescript makes it easier to use the Indexical API **for projects that are interacting with an existing codebase (written in JS or TS)**. It primarily contains helper functions that can extract the appropriate sources from code/configuration files, for use in Indexical API calls.
+The Indexical SDK for Javascript/Typescript makes it easier to use the Indexical API **for JS/TS projects that are interacting with an existing codebase**. It primarily contains helper functions that can extract the appropriate sources from code/configuration files, for use in Indexical API calls.
 
 Currently, the SDK supports analyzing projects written in JS/TS or in Python. Specifically, the SDK can extract sources in the following ways:
 
